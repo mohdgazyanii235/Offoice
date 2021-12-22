@@ -1,17 +1,24 @@
 package ae.globaltrd;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.util.IOUtils;
 
 public class PdfGenerator {
 
@@ -358,12 +365,68 @@ public class PdfGenerator {
     this.sheet.getRow(finalTotalRow).createCell(0).setCellValue("TOTAL");
     this.sheet.getRow(finalTotalRow).getCell(0).setCellStyle(finalTotalStyle);
     this.sheet.addMergedRegion(new CellRangeAddress(finalTotalRow, finalTotalRow, 1, 3));
-    this.sheet.getRow(finalTotalRow).createCell(1).setCellType(CellType.FORMULA);
-    this.sheet.getRow(finalTotalRow).getCell(1)
-        .setCellFormula("spellnumber(" + this.finalTotal + ")");
-    // this.sheet.getRow(finalTotalRow).getCell(1).setCellStyle(finalTotalStyle);
+    this.sheet.getRow(finalTotalRow).createCell(1);
+    this.sheet.getRow(finalTotalRow).getCell(1).setCellStyle(finalTotalStyle);
+    this.sheet.getRow(finalTotalRow).createCell(2);
+    this.sheet.getRow(finalTotalRow).createCell(3);
+    
+    this.sheet.getRow(finalTotalRow).getCell(1).setCellStyle(finalTotalStyle);
+    this.sheet.getRow(finalTotalRow).getCell(2).setCellStyle(finalTotalStyle);
+    this.sheet.getRow(finalTotalRow).getCell(3).setCellStyle(finalTotalStyle);
+    
+    this.sheet.getRow(finalTotalRow).getCell(1).setCellValue(SpellNumber.mainConvert(this.finalTotal));
+    
+    
     this.sheet.getRow(finalTotalRow).createCell(4).setCellValue(this.finalTotal);
     this.sheet.getRow(finalTotalRow).getCell(4).setCellStyle(finalTotalStyle);
+  }
+  
+  public void addFooter() {
+    CellStyle footerStyle = this.workbook.createCellStyle();
+    Font footerFont = this.workbook.createFont();
+    footerFont.setBold(true);
+    footerFont.setFontHeightInPoints((short) 10);
+    footerFont.setFontName("Arial");
+    footerStyle.setFont(footerFont);
+    footerStyle.setAlignment(HorizontalAlignment.CENTER);
+    footerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+    footerStyle.setWrapText(true);
+    
+    this.getNext();
+    this.getNext();
+    int footerTextRow = this.getNext();
+    this.sheet.createRow(footerTextRow);
+    this.sheet.addMergedRegion(new CellRangeAddress(footerTextRow, footerTextRow, 3,4));
+    this.sheet.getRow(footerTextRow).createCell(3).setCellValue("FOR GLOBAL TRANDING FZC");
+    this.sheet.getRow(footerTextRow).getCell(3).setCellStyle(footerStyle);
+    
+  }
+  
+  public void addStamp() throws IOException {
+    
+    CellStyle pictureStyle = this.workbook.createCellStyle();
+    pictureStyle.setAlignment(HorizontalAlignment.CENTER);
+    
+    InputStream is = new FileInputStream("src/main/resources/stamp.png");
+    byte[] bytes = IOUtils.toByteArray(is);
+    int pictureIdx = this.workbook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
+    is.close();
+    
+    CreationHelper helper = this.workbook.getCreationHelper();
+    Drawing drawing = this.sheet.createDrawingPatriarch();
+    ClientAnchor anchor = helper.createClientAnchor();
+    
+    this.getNext();
+    int pictureRow = this.getNext();
+    this.sheet.addMergedRegion(new CellRangeAddress(pictureRow, pictureRow+7, 3,4));
+    this.sheet.createRow(pictureRow).createCell(3).setCellStyle(pictureStyle);
+    
+    anchor.setCol1(3);
+    anchor.setRow1(pictureRow);
+    Picture pict = drawing.createPicture(anchor, pictureIdx);
+    pict.resize(1.0, Double.MAX_VALUE);   
+    
+    
   }
 
 
@@ -378,6 +441,9 @@ public class PdfGenerator {
     this.setEntryValues();
     this.setChargeValues();
     this.setFinalTotal();
+    this.addFooter();
+    this.addStamp();
+    
 
 
     this.sheet.autoSizeColumn(0);
@@ -395,7 +461,5 @@ public class PdfGenerator {
         .exec("C:\\Program Files (x86)\\Microsoft Office\\root\\Office16\\EXCEL.EXE "
             + this.storageLocation);
   }
-
-
 
 }

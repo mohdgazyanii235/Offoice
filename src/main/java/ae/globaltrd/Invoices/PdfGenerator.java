@@ -1,4 +1,4 @@
-package ae.globaltrd;
+package ae.globaltrd.Invoices;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,11 +41,11 @@ public class PdfGenerator {
     return this.value += 1;
   }
 
-  private String nameToPdf(String name) {
-    String finalString = name.substring(0, name.length() - 3) + "pdf";
-    System.out.println(finalString);
-    return finalString;
-  }
+//  private String nameToPdf(String name) {
+//    String finalString = name.substring(0, name.length() - 3) + "pdf";
+//    System.out.println(finalString);
+//    return finalString;
+//  }
 
   private void setTitle() throws IOException {
     CellStyle titleStyle = this.workbook.createCellStyle();
@@ -369,18 +369,19 @@ public class PdfGenerator {
     this.sheet.getRow(finalTotalRow).getCell(1).setCellStyle(finalTotalStyle);
     this.sheet.getRow(finalTotalRow).createCell(2);
     this.sheet.getRow(finalTotalRow).createCell(3);
-    
+
     this.sheet.getRow(finalTotalRow).getCell(1).setCellStyle(finalTotalStyle);
     this.sheet.getRow(finalTotalRow).getCell(2).setCellStyle(finalTotalStyle);
     this.sheet.getRow(finalTotalRow).getCell(3).setCellStyle(finalTotalStyle);
-    
-    this.sheet.getRow(finalTotalRow).getCell(1).setCellValue(SpellNumber.mainConvert(this.finalTotal));
-    
-    
+
+    this.sheet.getRow(finalTotalRow).getCell(1)
+        .setCellValue(SpellNumber.mainConvert(this.finalTotal));
+
+
     this.sheet.getRow(finalTotalRow).createCell(4).setCellValue(this.finalTotal);
     this.sheet.getRow(finalTotalRow).getCell(4).setCellStyle(finalTotalStyle);
   }
-  
+
   public void addFooter() {
     CellStyle footerStyle = this.workbook.createCellStyle();
     Font footerFont = this.workbook.createFont();
@@ -391,60 +392,75 @@ public class PdfGenerator {
     footerStyle.setAlignment(HorizontalAlignment.CENTER);
     footerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
     footerStyle.setWrapText(true);
-    
+
     this.getNext();
     this.getNext();
     int footerTextRow = this.getNext();
     this.sheet.createRow(footerTextRow);
-    this.sheet.addMergedRegion(new CellRangeAddress(footerTextRow, footerTextRow, 3,4));
+    this.sheet.addMergedRegion(new CellRangeAddress(footerTextRow, footerTextRow, 3, 4));
     this.sheet.getRow(footerTextRow).createCell(3).setCellValue("FOR GLOBAL TRANDING FZC");
     this.sheet.getRow(footerTextRow).getCell(3).setCellStyle(footerStyle);
-    
+
   }
-  
+
   public void addStamp() throws IOException {
-    
+
     CellStyle pictureStyle = this.workbook.createCellStyle();
     pictureStyle.setAlignment(HorizontalAlignment.CENTER);
-    
+
     InputStream is = new FileInputStream("src/main/resources/stamp.png");
     byte[] bytes = IOUtils.toByteArray(is);
     int pictureIdx = this.workbook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
     is.close();
-    
+
     CreationHelper helper = this.workbook.getCreationHelper();
     Drawing drawing = this.sheet.createDrawingPatriarch();
     ClientAnchor anchor = helper.createClientAnchor();
-    
+
     this.getNext();
     int pictureRow = this.getNext();
-    this.sheet.addMergedRegion(new CellRangeAddress(pictureRow, pictureRow+7, 3,4));
+    this.sheet.addMergedRegion(new CellRangeAddress(pictureRow, pictureRow + 7, 3, 4));
     this.sheet.createRow(pictureRow).createCell(3).setCellStyle(pictureStyle);
-    
+
     anchor.setCol1(3);
     anchor.setRow1(pictureRow);
     Picture pict = drawing.createPicture(anchor, pictureIdx);
-    pict.resize(1.0, Double.MAX_VALUE);   
-    
-    
+    pict.resize(1.0, Double.MAX_VALUE);
+
+
   }
 
+  public void createExcelSheet() throws Exception {
+    this.sheet.setMargin((short) 0, 0.15);
+    this.sheet.setMargin((short) 1, 0.15);
+    this.sheet.setMargin((short) 2, 0.15);
+    this.sheet.setMargin((short) 3, 0.15);
+    System.out.println("1) All Margins set to 0.15 inches");
 
-  public void start() throws Exception {
     this.setTitle();
+    System.out.println("2) Title Done");
     this.setSubTitle();
+    System.out.println("3) Sub-title Done.");
     this.setDocumentTypeTitle();
+    System.out.println("4) Document Type Written.");
     this.setCompanyAddress();
+    System.out.println("5) Invoicee Address Set.");
     this.setDeliveryInformation();
+    System.out.println("6) Delivery Information Set.");
     this.setInvoicerInformation();
+    System.out.println("7) Invoicer Information Set.");
     this.setFieldNames();
+    System.out.println("8) Field Names written.");
     this.setEntryValues();
+    System.out.println("9) Added All Invoice Entries.");
     this.setChargeValues();
+    System.out.println("10) Added All Charges.");
     this.setFinalTotal();
+    System.out.println("11) Final Totaling Done.");
     this.addFooter();
+    System.out.println("12) Added Footer Text.");
     this.addStamp();
-    
-
+    System.out.println("13) Added Footer Stamp.");
 
     this.sheet.autoSizeColumn(0);
     this.sheet.autoSizeColumn(1);
@@ -455,11 +471,23 @@ public class PdfGenerator {
     File file = new File(this.storageLocation);
     this.workbook.write(file);
     this.workbook.close();
+  }
 
-    // opent the excel file.
+  public void runExcelSheet() throws IOException {
     Runtime.getRuntime()
         .exec("C:\\Program Files (x86)\\Microsoft Office\\root\\Office16\\EXCEL.EXE "
             + this.storageLocation);
   }
+
+
+  public void convertExcelToPdf() throws Exception {
+    String script = "src/main/resources/ae/globaltrd/Invoices/ExcelToPdf.vbs";
+    String executable = "C:\\Windows\\System32\\wscript.exe";
+
+    String cmdArr[] = {executable, script};
+
+    Runtime.getRuntime().exec(cmdArr);
+  }
+  
 
 }

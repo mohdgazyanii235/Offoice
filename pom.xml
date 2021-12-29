@@ -85,6 +85,7 @@
 
 
 
+
 		<plugins>
 			<!-- Plugin 1 -->
 			<plugin>
@@ -93,6 +94,52 @@
 				<version>3.0.0-Mf</version>
 			</plugin>
 
+			<!-- Plugin 2 -->
+			<plugin>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-maven-plugin</artifactId>
+				<version>0.0.4</version>
+				<configuration>
+					<mainClass>ae.globaltrd.screenManager.ScreensFramework</mainClass>
+				</configuration>
+				<executions>
+					<!-- Execution 1 -->
+					<execution>
+						<id>debug</id>
+						<configuration>
+							<options>
+								<option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8001</option>
+							</options>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Plugin 3 -->
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<archive>
+						<manifest>
+							<mainClass>ae.globaltrd.screenManager.ScreensFramework</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+				<executions>
+					<!-- Execution 1 -->
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 
 	</build>

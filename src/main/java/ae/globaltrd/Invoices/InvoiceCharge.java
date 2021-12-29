@@ -1,4 +1,4 @@
-package ae.globaltrd;
+package ae.globaltrd.Invoices;
 
 public class InvoiceCharge {
   private String chargeName;

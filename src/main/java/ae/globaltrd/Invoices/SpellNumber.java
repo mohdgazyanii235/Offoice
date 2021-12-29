@@ -1,4 +1,4 @@
-package ae.globaltrd;
+package ae.globaltrd.Invoices;
 
 import java.text.DecimalFormat;
 
@@ -98,7 +98,7 @@ public class SpellNumber {
     result = result + tradThousand;
 
     // remove extra spaces!
-    return result.replaceAll("^\s+", "").replaceAll("\b\s{2,}\b", " ");
+    return result.replaceAll("^\\s+", "").replaceAll("\\b\\s{2,}\\b", " ");
   }
 
   public static String mainConvert(double number) {

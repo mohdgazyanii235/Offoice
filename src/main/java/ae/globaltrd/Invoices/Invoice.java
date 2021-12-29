@@ -1,4 +1,4 @@
-package ae.globaltrd;
+package ae.globaltrd.Invoices;
 
 import java.util.ArrayList;
 
@@ -115,7 +115,8 @@ public class Invoice {
 
   public void generatePdf(String location) throws Exception {
     PdfGenerator pdfGenerator = new PdfGenerator(this, location);
-    pdfGenerator.start();
+    pdfGenerator.createExcelSheet();
+    pdfGenerator.convertExcelToPdf();
   }
 
   public String getBlNumber() {
